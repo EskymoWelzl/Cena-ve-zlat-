@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Přepočet na zlato</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      background-color: #f9f9f9;
+    }
+    label {
+      display: block;
+      margin-top: 0.8em;
+    }
+    input, select {
+      padding: 0.4em;
+      margin-top: 0.2em;
+      width: 100%;
+      max-width: 400px;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.6em 1.2em;
+    }
+    .result {
+      margin-top: 2em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Přepočet hodnoty na zlato</h1>
+
+  <label>Částka:</label>
+  <input type="number" id="amount" value="10000">
+
+  <label>Vstupní rok:</label>
+  <input type="number" id="yearA" value="1985">
+
+  <label>Cílový rok:</label>
+  <input type="number" id="yearB" value="2024">
+
+  <label>Měna:</label>
+  <select id="currency">
+    <option value="CZK">Kč</option>
+    <option value="USD">USD</option>
+    <option value="DEM">DEM</option>
+    <option value="EUR">EUR</option>
+    <option value="CHF">CHF</option>
+    <option value="RUB">RUB</option>
+  </select>
+
+  <label>Typ kurzu:</label>
+  <select id="rateType">
+    <option value="official">Oficiální kurz</option>
+    <option value="black">Černý trh</option>
+    <option value="tuzex">Tuzex bony</option>
+    <option value="manual">Zadat vlastní kurz</option>
+  </select>
+
+  <label id="customRateLabel" style="display:none;">Vlastní kurz (např. 30 Kč za 1 USD):</label>
+  <input type="number" id="customRate" style="display:none;" value="30">
+
+  <label>Cena zlata v roce A (Kč/gram):</label>
+  <input type="number" id="goldA" value="132">
+
+  <label>Cena zlata v roce B (Kč/gram):</label>
+  <input type="number" id="goldB" value="1702">
+
+  <button onclick="calculate()">Přepočítej</button>
+
+  <div class="result" id="output"></div>
+
+  <script>
+    const rateMap = {
+      official: 13,
+      black: 30,
+      tuzex: 25
+    };
+
+    document.getElementById("rateType").addEventListener("change", () => {
+      const type = document.getElementById("rateType").value;
+      const show = type === "manual";
+      document.getElementById("customRate").style.display = show ? "block" : "none";
+      document.getElementById("customRateLabel").style.display = show ? "block" : "none";
+    });
+
+    function calculate() {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const yearA = parseInt(document.getElementById("yearA").value);
+      const yearB = parseInt(document.getElementById("yearB").value);
+      const currency = document.getElementById("currency").value;
+      const rateType = document.getElementById("rateType").value;
+      const customRate = parseFloat(document.getElementById("customRate").value);
+      const goldA = parseFloat(document.getElementById("goldA").value);
+      const goldB = parseFloat(document.getElementById("goldB").value);
+
+      let rate = rateMap[rateType] || customRate;
+
+      // Přepočet na Kč pokud měna není CZK
+      let amountCZK = currency === "CZK" ? amount : amount * rate;
+
+      // Přepočet na gramy zlata v roce A
+      const grams = amountCZK / goldA;
+
+      // Hodnota těchto gramů zlata v roce B
+      const newCZK = grams * goldB;
+
+      document.getElementById("output").innerText =
+        `${amount} ${currency} z roku ${yearA} odpovídá v roce ${yearB} hodnotě přibližně ${newCZK.toFixed(2)} Kč.`;
+    }
+  </script>
+</body>
+</html>
